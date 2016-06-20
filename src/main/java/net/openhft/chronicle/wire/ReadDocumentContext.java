@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
@@ -65,7 +66,7 @@ public class ReadDocumentContext implements DocumentContext {
     @Override
     public void close() {
         if (readLimit > 0 && wire != null) {
-            final Bytes<?> bytes = wire.bytes();
+            @NotNull final Bytes<?> bytes = wire.bytes();
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
         }
@@ -76,7 +77,7 @@ public class ReadDocumentContext implements DocumentContext {
        // assert wire.startUse();
         wire.getValueOut().resetState();
         readPosition = readLimit = -1;
-        final Bytes<?> bytes = wire.bytes();
+        @NotNull final Bytes<?> bytes = wire.bytes();
 
         present = false;
         if (bytes.readRemaining() < 4) {

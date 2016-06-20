@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
 import java.util.List;
@@ -18,7 +19,7 @@ class WireObjectOutput implements ObjectOutput {
 
     @Override
     public void writeObject(Object obj) {
-        final ValueOut valueOut = wire.getValueOut();
+        @NotNull final ValueOut valueOut = wire.getValueOut();
         if (obj instanceof Map)
             valueOut.typePrefix(Map.class);
         else if (obj instanceof List)
@@ -37,7 +38,7 @@ class WireObjectOutput implements ObjectOutput {
     }
 
     @Override
-    public void write(byte[] b, int off, int len) {
+    public void write(@NotNull byte[] b, int off, int len) {
         if (off == 0 && len == b.length)
             write(b);
         else

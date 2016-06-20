@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 public class ProjectTest {
 
     static class Dto1 extends AbstractMarshallable {
+        @NotNull
         Map m = new HashMap<>();
         String anotherField;
         long someValue;
@@ -20,13 +22,14 @@ public class ProjectTest {
     static class Dto2 extends AbstractMarshallable {
         long someValue;
         String anotherField;
+        @NotNull
         Map m = new HashMap<>();
     }
 
 
     @Test
     public void testProject() throws Exception {
-        Dto1 dto1 = new Dto1();
+        @NotNull Dto1 dto1 = new Dto1();
         dto1.m.put("some", "data");
         dto1.anotherField = "someString";
         dto1.someValue = 1;

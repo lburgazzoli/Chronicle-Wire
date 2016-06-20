@@ -188,7 +188,7 @@ public interface ValueOut {
     }
 
     @NotNull
-    default WireOut typeLiteral(Class type) {
+    default WireOut typeLiteral(@Nullable Class type) {
         return type == null ? nu11()
                 : typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
     }
@@ -236,7 +236,7 @@ public interface ValueOut {
     <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
     @NotNull
-    default WireOut array(@NotNull WriteValue writer, Class arrayType) {
+    default WireOut array(@NotNull WriteValue writer, @NotNull Class arrayType) {
         if (arrayType == String[].class) {
             typePrefix("String[] ");
         } else if (arrayType != Object[].class) {
@@ -274,6 +274,7 @@ public interface ValueOut {
     @NotNull
     ValueOut leaf();
 
+    @NotNull
     default ValueOut leaf(boolean leaf) {
         return leaf ? leaf() : this;
     }
@@ -304,26 +305,32 @@ public interface ValueOut {
         return marshallable(object);
     }
 
-    default <E extends Enum<E>> WireOut asEnum(E e) {
+    @NotNull
+    default <E extends Enum<E>> WireOut asEnum(@Nullable E e) {
         return text(e == null ? null : e.name());
     }
 
+    @NotNull
     default <V> WireOut set(Set<V> coll) {
         return set(coll, null);
     }
 
+    @NotNull
     default <V> WireOut set(Set<V> coll, Class<V> assumedClass) {
         return collection(coll, assumedClass);
     }
 
+    @NotNull
     default <V> WireOut list(List<V> coll) {
         return list(coll, null);
     }
 
+    @NotNull
     default <V> WireOut list(List<V> coll, Class<V> assumedClass) {
         return collection(coll, assumedClass);
     }
 
+    @NotNull
     default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) {
         sequence(coll, (s, out) -> {
             for (V v : s) {
@@ -347,18 +354,20 @@ public interface ValueOut {
         return wireOut();
     }
 
+    @NotNull
     default <K, V> WireOut marshallable(Map<K, V> map) {
         return marshallable(map, null, null, true);
     }
 
-    default <K, V> WireOut marshallable(Map<K, V> map, Class<K> kClass, Class<V> vClass, boolean leaf) {
+    @NotNull
+    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, Class<K> kClass, Class<V> vClass, boolean leaf) {
         if (map == null) {
             nu11();
             return wireOut();
         }
 
         marshallable(m -> {
-            for (Map.Entry<K, V> entry : map.entrySet()) {
+            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
                 m.writeEvent(kClass, entry.getKey()).leaf(leaf)
                         .object(vClass, entry.getValue());
             }
@@ -367,7 +376,7 @@ public interface ValueOut {
     }
 
     @NotNull
-    default WireOut object(Object value) {
+    default WireOut object(@Nullable Object value) {
         if (value == null)
             return nu11();
         // look for exact matches
@@ -452,7 +461,7 @@ public interface ValueOut {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            Class type = (Class) value.getClass().getComponentType();
+            @NotNull Class type = (Class) value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
@@ -469,6 +478,7 @@ public interface ValueOut {
      * @param aClass to write
      * @return this
      */
+    @NotNull
     default ValueOut optionalTyped(Class aClass) {
         return this;
     }
@@ -493,16 +503,18 @@ public interface ValueOut {
         return typePrefix(int.class).int32(value);
     }
 
+    @NotNull
     default WireOut fixedFloat64(double value) {
         return float64(value);
     }
 
+    @NotNull
     default WireOut fixedInt64(long value) {
         return int64(value);
     }
 
     @NotNull
-    default WireOut untypedObject(Object value) {
+    default WireOut untypedObject(@Nullable Object value) {
         if (value == null)
             return nu11();
         // look for exact matches
@@ -527,7 +539,7 @@ public interface ValueOut {
         if (value instanceof Enum)
             return text(((Enum) value).name());
         if (Object[].class.isAssignableFrom(value.getClass())) {
-            Class type = (Class) value.getClass().getComponentType();
+            @NotNull Class type = (Class) value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
         }
         return object(value);
@@ -565,7 +577,7 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
-    default WireOut compress(String compression, Bytes uncompressedBytes) {
+    default WireOut compress(String compression, @Nullable Bytes uncompressedBytes) {
         if (uncompressedBytes == null)
             return nu11();
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
@@ -580,8 +592,9 @@ public interface ValueOut {
         return Integer.MAX_VALUE;
     }
 
+    @NotNull
     @Deprecated
-    default WireOut compress(String compression, String str) {
+    default WireOut compress(String compression, @Nullable String str) {
         if (str == null || str.length() < SMALL_MESSAGE)
             return text(str);
         // replace with compress(String compression, Bytes compressedBytes)

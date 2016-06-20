@@ -20,10 +20,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.LongPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
 import java.io.ObjectInput;
@@ -44,30 +46,33 @@ public abstract class AbstractWire implements Wire {
         ASSERTIONS = assertions;
     }
 
+    @NotNull
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
     protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
     protected long headerNumber = Long.MIN_VALUE;
+    @Nullable
     volatile Thread usedBy;
+    @Nullable
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
     private boolean notCompleteIsNotPresent;
     private ObjectOutput objectOutput;
     private ObjectInput objectInput;
 
-    public AbstractWire(Bytes bytes, boolean use8bit) {
+    public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();
     }
 
-    private static long throwNotEnoughSpace(int maxlen, Bytes<?> bytes) {
+    private static long throwNotEnoughSpace(int maxlen, @NotNull Bytes<?> bytes) {
         throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
     }
 
-    private static void throwHeaderOverwritten(long position, int expectedHeader, Bytes<?> bytes) throws StreamCorruptedException {
+    private static void throwHeaderOverwritten(long position, int expectedHeader, @NotNull Bytes<?> bytes) throws StreamCorruptedException {
         throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
     }
 
@@ -91,6 +96,7 @@ public abstract class AbstractWire implements Wire {
         headerNumber = 0L;
     }
 
+    @NotNull
     @Override
     public Wire headerNumber(long headerNumber) {
         this.headerNumber = headerNumber;
@@ -126,6 +132,7 @@ public abstract class AbstractWire implements Wire {
         return bytes.readRemaining() > 0;
     }
 
+    @NotNull
     @Override
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
         bytes.readLimit(bytes.capacity());
@@ -199,7 +206,8 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long writeHeader(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
+    public long writeHeader(int length, long timeout, @NotNull TimeUnit timeUnit,
+                            @Nullable LongValue lastPosition) throws TimeoutException, EOFException {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
@@ -212,6 +220,11 @@ public abstract class AbstractWire implements Wire {
             return pos;
         }
 
+        if (lastPosition == null)
+            return writeHeader0(length, timeout, timeUnit);
+
+        headerNumber = Long.MIN_VALUE;
+        bytes.writePosition(lastPosition.getValue());
         return writeHeader0(length, timeout, timeUnit);
     }
 
@@ -364,8 +377,8 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean startUse() {
-        Throwable usedHere = this.usedHere;
-        Thread usedBy = this.usedBy;
+        @Nullable Throwable usedHere = this.usedHere;
+        @Nullable Thread usedBy = this.usedBy;
         if (usedBy != Thread.currentThread() && usedBy != null) {
             throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
         }

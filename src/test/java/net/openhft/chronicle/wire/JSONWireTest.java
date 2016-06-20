@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -30,15 +32,15 @@ import static org.junit.Assert.assertEquals;
 public class JSONWireTest {
     @Test
     public void testListFormatting() {
-        JSONWire wire = new JSONWire(Bytes.elasticByteBuffer());
+        @NotNull JSONWire wire = new JSONWire(Bytes.elasticByteBuffer());
 
-        List<Item> items = new ArrayList<>();
+        @NotNull List<Item> items = new ArrayList<>();
         items.add(new Item("item1", 1235666L, 1.1231231));
         items.add(new Item("item2", 2235666L, 1.0987987));
         items.add(new Item("item3", 3235666L, 1.12312));
         items.add(new Item("item4", 4235666L, 1.51231));
 
-        WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
+        @NotNull WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
 
         assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
                 "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
@@ -48,31 +50,31 @@ public class JSONWireTest {
 
     @Test
     public void testOpenBracket() {
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
 
-        JSONWire wire1 = new JSONWire(Bytes.from("\"echo\":\"Hello\"\n" +
+        @NotNull JSONWire wire1 = new JSONWire(Bytes.from("\"echo\":\"Hello\"\n" +
                 "\"echo2\":\"Hello2\"\n"));
-        String text1 = wire1.readEventName(sb).text();
+        @Nullable String text1 = wire1.readEventName(sb).text();
         assertEquals("echo", sb.toString());
         assertEquals("Hello", text1);
-        String text2 = wire1.readEventName(sb).text();
+        @Nullable String text2 = wire1.readEventName(sb).text();
         assertEquals("echo2", sb.toString());
         assertEquals("Hello2", text2);
 
-        JSONWire wire2 = new JSONWire(Bytes.from("{ \"echoB\":\"HelloB\" }\n" +
+        @NotNull JSONWire wire2 = new JSONWire(Bytes.from("{ \"echoB\":\"HelloB\" }\n" +
                 "{ \"echo2B\":\"Hello2B\" }\n"));
-        String textB = wire2.readEventName(sb).text();
+        @Nullable String textB = wire2.readEventName(sb).text();
         assertEquals("echoB", sb.toString());
         assertEquals("HelloB", textB);
-        String textB2 = wire2.readEventName(sb).text();
+        @Nullable String textB2 = wire2.readEventName(sb).text();
         assertEquals("echo2B", sb.toString());
         assertEquals("Hello2B", textB2);
     }
 
     @Test
     public void testNoSpaces() {
-        JSONWire wire = new JSONWire(Bytes.from("\"echo\":\"\""));
-        WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
+        @NotNull JSONWire wire = new JSONWire(Bytes.from("\"echo\":\"\""));
+        @NotNull WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
         parser.parseOne(wire, null);
         assertEquals("", wire.bytes().toString());
     }

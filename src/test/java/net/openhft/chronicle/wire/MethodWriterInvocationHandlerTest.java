@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.Closeable;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
@@ -22,10 +23,10 @@ public class MethodWriterInvocationHandlerTest {
         expect(out.recordHistory()).andReturn(true);
         replay(out);
 
-        MethodWriterInvocationHandler handler = new MethodWriterInvocationHandler(out);
+        @NotNull MethodWriterInvocationHandler handler = new MethodWriterInvocationHandler(out);
         handler.onClose(closeable);
 
-        try (Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), new Class[]{Closeable.class}, handler)) {
+        try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), new Class[]{Closeable.class}, handler)) {
             // and close it
         }
 

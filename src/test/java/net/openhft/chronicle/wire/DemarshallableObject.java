@@ -17,11 +17,13 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by peter on 27/01/16.
  */
 public class DemarshallableObject implements Demarshallable, WriteMarshallable {
+    @Nullable
     final String name;
     final int value;
 
@@ -30,7 +32,7 @@ public class DemarshallableObject implements Demarshallable, WriteMarshallable {
         this.value = value;
     }
 
-    public DemarshallableObject(WireIn wire) {
+    public DemarshallableObject(@NotNull WireIn wire) {
         this.name = wire.read(() -> "name").text();
         this.value = wire.read(() -> "value").int32();
     }

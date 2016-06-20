@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Map;
@@ -29,7 +30,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
  * The implementation of this interface is both readable and write-able as marshallable data.
  */
 public interface Marshallable extends WriteMarshallable, ReadMarshallable {
-    static boolean $equals(WriteMarshallable $this, Object o) {
+    static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
         return o instanceof WriteMarshallable &&
                 ($this == o || Wires.isEquals($this, o));
     }
@@ -42,23 +43,28 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.asString($this);
     }
 
+    @Nullable
     static <T> T fromString(CharSequence cs) {
         return TEXT.fromString(cs);
     }
 
+    @Nullable
     static <T> T fromFile(String filename) throws IOException {
         return TEXT.fromFile(filename);
     }
 
+    @NotNull
     static Map<String, Object> fromFileAsMap(String filename) throws IOException {
         return TEXT.fromFileAsMap(filename, Object.class);
     }
 
-    static <V> Map<String, V> fromFileAsMap(String filename, Class<V> valueClass) throws IOException {
+    @NotNull
+    static <V> Map<String, V> fromFileAsMap(String filename, @NotNull Class<V> valueClass) throws IOException {
         return TEXT.fromFileAsMap(filename, valueClass);
     }
 
-    static Map<String, Object> fromHexString(CharSequence cs) {
+    @Nullable
+    static Map<String, Object> fromHexString(@NotNull CharSequence cs) {
         return READ_ANY.fromHexString(cs);
     }
 
@@ -72,6 +78,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         Wires.writeMarshallable(this, wire);
     }
 
+    @NotNull
     default <T extends Marshallable & KeyedMarshallable> T deepCopy() {
         return (T) Wires.deepCopy(this);
     }
@@ -80,8 +87,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return Wires.copyTo(this, t);
     }
 
-    default <K, T extends Marshallable> T mergeToMap(Map<K, T> map, Function<T, K> getKey) {
-        @SuppressWarnings("unchecked")
+    default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {
+        @NotNull @SuppressWarnings("unchecked")
         T t = (T) this;
         return map.merge(getKey.apply(t), t,
                 (p, c) -> p == null ? c.deepCopy() : p.copyFrom(c));

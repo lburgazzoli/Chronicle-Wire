@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author gadei
@@ -32,6 +33,7 @@ import net.openhft.chronicle.wire.WireOut;
 public class WireModel extends AbstractMarshallable {
     private long id;
     private int revision;
+    @Nullable
     private String key;
 
     public WireModel() {
@@ -44,14 +46,14 @@ public class WireModel extends AbstractMarshallable {
     }
 
     @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
+    public void readMarshallable(@org.jetbrains.annotations.NotNull @NotNull WireIn wire) throws IllegalStateException {
         this.id = wire.read(ModelKeys.id).int64();
         this.revision = wire.read(ModelKeys.revision).int32();
         this.key = wire.read(ModelKeys.key).text();
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@org.jetbrains.annotations.NotNull WireOut wire) {
         wire.write(ModelKeys.id).int64(id)
                 .write(ModelKeys.revision).int32(revision)
                 .write(ModelKeys.key).text(key);
@@ -73,6 +75,7 @@ public class WireModel extends AbstractMarshallable {
         this.revision = revision;
     }
 
+    @Nullable
     public String getKey() {
         return key;
     }

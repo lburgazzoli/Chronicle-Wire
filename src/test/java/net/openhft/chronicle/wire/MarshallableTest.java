@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -25,11 +26,11 @@ import static org.junit.Assert.assertTrue;
 public class MarshallableTest {
     @Test
     public void testBytesMarshallable() {
-        Marshallable m = new MyTypesCustom();
+        @NotNull Marshallable m = new MyTypesCustom();
 
-        Bytes bytes = nativeBytes();
+        @NotNull Bytes bytes = nativeBytes();
         assertTrue(bytes.isElastic());
-        TextWire wire = new TextWire(bytes);
+        @NotNull TextWire wire = new TextWire(bytes);
         m.writeMarshallable(wire);
 
         m.readMarshallable(wire);
@@ -37,14 +38,14 @@ public class MarshallableTest {
 
     @Test
     public void testWriteDelta() {
-        Wire wire = new TextWire(Bytes.elasticByteBuffer());
-        AClass a1 = new AClass(1, true, (byte) 1, '1', (short) 1, 1, 1L, 1.0f, 1.0, "one");
+        @NotNull Wire wire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull AClass a1 = new AClass(1, true, (byte) 1, '1', (short) 1, 1, 1L, 1.0f, 1.0, "one");
         wire.writeDocument(false, a1);
-        AClass a2 = new AClass(1, true, (byte) 1, '1', (short) 2, 1, 1L, 2.0f, 1.0, "one");
+        @NotNull AClass a2 = new AClass(1, true, (byte) 1, '1', (short) 2, 1, 1L, 2.0f, 1.0, "one");
         wire.writeDocument(false, w -> Wires.writeMarshallable(a2, w, a1, true));
-        AClass a3 = new AClass(1, false, (byte) 1, '2', (short) 2, 2, 2L, 2.0f, 1.0, "two");
+        @NotNull AClass a3 = new AClass(1, false, (byte) 1, '2', (short) 2, 2, 2L, 2.0f, 1.0, "two");
         wire.writeDocument(false, w -> Wires.writeMarshallable(a3, w, a1, true));
-        AClass a4 = new AClass(2, false, (byte) 2, '2', (short) 2, 2, 2L, 2.0f, 2.0, "two");
+        @NotNull AClass a4 = new AClass(2, false, (byte) 2, '2', (short) 2, 2, 2L, 2.0f, 2.0, "two");
         wire.writeDocument(false, w -> Wires.writeMarshallable(a4, w, a1, true));
         assertEquals("--- !!data\n" +
                 "id: 1\n" +

@@ -19,15 +19,20 @@ package net.openhft.chronicle.wire.reuse;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Gadi Eichhorn
  */
 public class WireProperty extends WireModel {
 
+    @Nullable
     private String reference;
+    @Nullable
     private String path;
+    @Nullable
     private String name;
+    @Nullable
     private String value;
 
     public WireProperty(String reference, String path, String name, String value, long id, int revision, String key) {
@@ -39,7 +44,7 @@ public class WireProperty extends WireModel {
     }
 
     @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
+    public void readMarshallable(@org.jetbrains.annotations.NotNull @NotNull WireIn wire) throws IllegalStateException {
         super.readMarshallable(wire);
         this.reference = wire.read(ModelKeys.reference).text();
         this.path = wire.read(ModelKeys.path).text();
@@ -48,7 +53,7 @@ public class WireProperty extends WireModel {
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@org.jetbrains.annotations.NotNull WireOut wire) {
         super.writeMarshallable(wire);
         wire.write(ModelKeys.reference).text(reference)
                 .write(ModelKeys.path).text(path)
@@ -56,6 +61,7 @@ public class WireProperty extends WireModel {
                 .write(ModelKeys.value).text(value);
     }
 
+    @Nullable
     public String getReference() {
         return reference;
     }
@@ -64,6 +70,7 @@ public class WireProperty extends WireModel {
         this.reference = reference;
     }
 
+    @Nullable
     public String getPath() {
         return path;
     }
@@ -72,6 +79,7 @@ public class WireProperty extends WireModel {
         this.path = path;
     }
 
+    @Nullable
     public String getName() {
         return name;
     }
@@ -80,6 +88,7 @@ public class WireProperty extends WireModel {
         this.name = name;
     }
 
+    @Nullable
     public String getValue() {
         return value;
     }

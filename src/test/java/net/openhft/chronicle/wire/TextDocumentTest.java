@@ -51,13 +51,13 @@ public class TextDocumentTest {
     @Test
     public void testDocument() {
         Bytes<Void> bytes1 = Bytes.allocateElasticDirect();
-        final Wire wire = new TextWire(bytes1);
-        final Header wheader = new Header();
-        final Header rheader = new Header();
+        @NotNull final Wire wire = new TextWire(bytes1);
+        @NotNull final Header wheader = new Header();
+        @NotNull final Header rheader = new Header();
 
         wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
 
-        Bytes<?> bytes = wire.bytes();
+        @NotNull Bytes<?> bytes = wire.bytes();
         assertEquals("--- !!meta-data\n" +
                 "header: {\n" +
                 "  uuid: "+wheader.uuid+",\n" +

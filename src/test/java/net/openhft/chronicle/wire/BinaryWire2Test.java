@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,14 +40,14 @@ public class BinaryWire2Test {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
+        @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
         assert wire.startUse();
         return wire;
     }
 
     @Test
     public void testBool() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
@@ -59,7 +60,7 @@ public class BinaryWire2Test {
     @Test
     @Ignore("TODO FIX")
     public void testBytesStore() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
@@ -70,7 +71,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testFloat32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
                 .write().float32(Float.POSITIVE_INFINITY);
@@ -82,7 +83,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testTime() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
@@ -95,10 +96,10 @@ public class BinaryWire2Test {
 
     @Test
     public void testZonedDateTime() {
-        Wire wire = createWire();
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
-        ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
+        @NotNull Wire wire = createWire();
+        @NotNull ZonedDateTime now = ZonedDateTime.now();
+        @NotNull ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
+        @NotNull ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
         wire.write().zonedDateTime(now)
                 .write().zonedDateTime(max)
                 .write().zonedDateTime(min);
@@ -110,8 +111,8 @@ public class BinaryWire2Test {
 
     @Test
     public void testDate() {
-        Wire wire = createWire();
-        LocalDate now = LocalDate.now();
+        @NotNull Wire wire = createWire();
+        @NotNull LocalDate now = LocalDate.now();
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
@@ -123,8 +124,8 @@ public class BinaryWire2Test {
 
     @Test
     public void testUuid() {
-        Wire wire = createWire();
-        UUID uuid = UUID.randomUUID();
+        @NotNull Wire wire = createWire();
+        @NotNull UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
@@ -136,12 +137,12 @@ public class BinaryWire2Test {
 
     @Test
     public void testSequence() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         writeMessage(wire);
 
         System.out.println(wire.bytes().toHexString());
 
-        Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessage(twire);
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
@@ -164,12 +165,12 @@ public class BinaryWire2Test {
 
     @Test
     public void testSequenceContext() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         writeMessageContext(wire);
 
         System.out.println(wire.bytes().toHexString());
 
-        Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessageContext(twire);
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
@@ -194,7 +195,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testEnum() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().object(WireType.BINARY)
                 .write().object(WireType.TEXT)
                 .write().object(WireType.RAW);
@@ -207,7 +208,7 @@ public class BinaryWire2Test {
 
     @Test
     public void fieldAfterText() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data")
                 .typePrefix("!UpdateEvent").marshallable(
                         v -> v.write("assetName").text("/name")
@@ -232,7 +233,7 @@ public class BinaryWire2Test {
 
     @Test
     public void fieldAfterNull() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data").typedMarshallable("!UpdateEvent",
                 v -> v.write("assetName").text("/name")
                         .write("key").object("test")
@@ -256,7 +257,7 @@ public class BinaryWire2Test {
 
     @Test
     public void fieldAfterNullContext() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         try (DocumentContext _ = wire.writingDocument(true)) {
             wire.write("tid").int64(1234567890L);
         }
@@ -300,7 +301,7 @@ public class BinaryWire2Test {
 
     @Test
     public void readDemarshallable() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         try (DocumentContext $ = wire.writingDocument(true)) {
             wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
@@ -312,7 +313,7 @@ public class BinaryWire2Test {
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         try (DocumentContext $ = wire.readingDocument()) {
-            DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
+            @Nullable DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
             assertEquals("test", dobj.name);
             assertEquals(12345, dobj.value);
         }
@@ -320,13 +321,13 @@ public class BinaryWire2Test {
 
     @Test
     public void testSnappyCompressWithSnappy() throws IOException {
-        Wire wire = createWire();
-        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        @NotNull Wire wire = createWire();
+        @NotNull String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
         wire.write("message").compress("snappy", str);
 
         wire.bytes().readPosition(0);
-        String str2 = wire.read(() -> "message").text();
+        @Nullable String str2 = wire.read(() -> "message").text();
         assertEquals(str, str2);
 
         wire.bytes().readPosition(0);
@@ -338,13 +339,13 @@ public class BinaryWire2Test {
     @Test
     @Ignore("Todo fix")
     public void testSnappyCompressWithSnappy2() throws IOException {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         Bytes str = Bytes.from("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
         wire.write("message").compress("snappy", str);
 
         wire.bytes().readPosition(0);
-        String str2 = wire.read(() -> "message").text();
+        @Nullable String str2 = wire.read(() -> "message").text();
         assertEquals(str.toString(), str2);
 
         wire.bytes().readPosition(0);
@@ -357,12 +358,12 @@ public class BinaryWire2Test {
     @Ignore
     @Test
     public void testCompression() {
-        for (String comp : "binary,gzip,lzw".split(",")) {
+        for (@NotNull String comp : "binary,gzip,lzw".split(",")) {
             bytes.clear();
 
-            Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
+            @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
             assert wire.startUse();
-            String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
+            @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
             BytesStore bytes = BytesStore.from(str);
 
             wire.write().bytes(bytes);
@@ -372,7 +373,7 @@ public class BinaryWire2Test {
                         wire.bytes().readRemaining() < str.length());
 
             wire.bytes().readPosition(0);
-            BytesStore bytesStore = wire.read()
+            @Nullable BytesStore bytesStore = wire.read()
                     .bytesStore();
             assert bytesStore != null;
             assertEquals(bytes.toDebugString(), bytesStore.toDebugString());
@@ -381,9 +382,9 @@ public class BinaryWire2Test {
 
     @Test
     public void testByteArrayValueWithRealBytesNegative() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
+        @NotNull final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
         wire.writeDocument(false, wir -> wir.writeEventName(() -> "put")
                 .marshallable(w -> w.write("key").text("1")
                         .write("value")
@@ -399,12 +400,12 @@ public class BinaryWire2Test {
 
     @Test
     public void testBytesArray() {
-        Wire wire = createWire();
-        Random rand = new Random();
+        @NotNull Wire wire = createWire();
+        @NotNull Random rand = new Random();
         for (int i = 0; i < 70000; i += rand.nextInt(i + 1) + 1) {
             System.out.println(i);
             wire.clear();
-            final byte[] fromBytes = new byte[i];
+            @NotNull final byte[] fromBytes = new byte[i];
             wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
             Wires.fromSizePrefixedBlobs(wire);
             int finalI = i;
@@ -414,7 +415,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testSmallArray() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("index")
                 .int64array(10));
         assertEquals("--- !!data #binary\n" +
@@ -426,7 +427,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testTypeLiteral() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("a").typeLiteral(String.class)
                 .write("b").typeLiteral(int.class)
                 .write("c").typeLiteral(byte[].class)
@@ -442,11 +443,11 @@ public class BinaryWire2Test {
 
     @Test
     public void testByteArray() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
-        byte[] one = {1};
+        @NotNull byte[] one = {1};
         wire.writeDocument(false, w -> w.write("one").object(one));
-        byte[] four = {1, 2, 3, 4};
+        @NotNull byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
         assertEquals("--- !!data #binary\n" +
@@ -467,12 +468,12 @@ public class BinaryWire2Test {
 
     @Test
     public void testObjectKeys() {
-        Map<MyMarshallable, String> map = new LinkedHashMap<>();
+        @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
         map.put(new MyMarshallable("key2"), "value2");
 
-        Wire wire = createWire();
-        final MyMarshallable parent = new MyMarshallable("parent");
+        @NotNull Wire wire = createWire();
+        @NotNull final MyMarshallable parent = new MyMarshallable("parent");
         wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
 
         assertEquals("--- !!data #binary\n" +
@@ -487,7 +488,7 @@ public class BinaryWire2Test {
             assertEquals(parent.toString(), mm.toString());
             parent.equals(mm);
             assertEquals(parent, mm);
-            final Map map2 = w.getValueIn()
+            @Nullable final Map map2 = w.getValueIn()
                     .object(Map.class);
             assertEquals(map, map2);
         });
@@ -495,10 +496,10 @@ public class BinaryWire2Test {
 
     @Test
     public void testBytesLiteral() {
-        Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
         wire.write("test").text("Hello World");
 
-        final BinaryWire wire1 = createWire();
+        @NotNull final BinaryWire wire1 = createWire();
         wire1.writeDocument(false, (WireOut w) -> w.write(() -> "nested")
                 .bytesLiteral(wire.bytes()));
 
@@ -508,7 +509,7 @@ public class BinaryWire2Test {
                 "}\n", Wires.fromSizePrefixedBlobs(wire1));
 
         wire1.readDocument(null, w -> {
-            final BytesStore bytesStore = w.read(() -> "nested")
+            @Nullable final BytesStore bytesStore = w.read(() -> "nested")
                     .bytesLiteral();
             assertEquals(wire.bytes(), bytesStore);
         });
@@ -516,15 +517,15 @@ public class BinaryWire2Test {
 
     @Test
     public void testWriteMap() {
-        Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
 
-        Map<String, Object> putMap = new HashMap<String, Object>();
+        @NotNull Map<String, Object> putMap = new HashMap<String, Object>();
         putMap.put("TestKey", "TestValue");
         putMap.put("TestKey2", 1.0);
 
         wire.writeAllAsMap(String.class, Object.class, putMap);
 
-        Map<String, Object> newMap = new HashMap<String, Object>();
+        @NotNull Map<String, Object> newMap = new HashMap<String, Object>();
 
         wire.readAllAsMap(String.class, Object.class, newMap);
 

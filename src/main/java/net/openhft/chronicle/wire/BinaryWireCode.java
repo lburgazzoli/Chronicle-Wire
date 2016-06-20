@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Field;
 
 /**
@@ -101,7 +103,7 @@ public enum BinaryWireCode {
 
     static {
         try {
-            for (Field field : BinaryWireCode.class.getDeclaredFields()) {
+            for (@NotNull Field field : BinaryWireCode.class.getDeclaredFields()) {
                 if (field.getType() == int.class)
                     STRING_FOR_CODE[field.getInt(null)] = field.getName();
             }
@@ -127,6 +129,7 @@ public enum BinaryWireCode {
                 (code >= FIELD_NAME0 && code <= FIELD_NAME31);
     }
 
+    @NotNull
     public static String stringForCode(int code) {
         return code == -1 ? "EndOfFile" : STRING_FOR_CODE[code];
     }

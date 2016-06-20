@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import junit.framework.TestCase;
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +53,7 @@ public class ValueOutTest extends TestCase {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         assert wire.startUse();
-        final byte[] expected = "this is my byte array".getBytes();
+        @NotNull final byte[] expected = "this is my byte array".getBytes();
         wire.writeDocument(false, w ->
                 w.write().object(expected)
 
@@ -60,7 +62,7 @@ public class ValueOutTest extends TestCase {
         System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, w -> {
-            final byte[] actual = (byte[]) w.read().object();
+            @Nullable final byte[] actual = (byte[]) w.read().object();
             Assert.assertArrayEquals(expected, actual);
 
         });
@@ -72,13 +74,13 @@ public class ValueOutTest extends TestCase {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         assert wire.startUse();
-        final byte[] expected = "this is my byte array".getBytes();
+        @NotNull final byte[] expected = "this is my byte array".getBytes();
         wire.writeDocument(false, w -> w.write().object(expected));
 
         System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, w -> {
-            final byte[] actual = w.read().object(byte[].class);
+            @Nullable final byte[] actual = w.read().object(byte[].class);
             Assert.assertArrayEquals(expected, actual);
         });
 
@@ -91,7 +93,7 @@ public class ValueOutTest extends TestCase {
         assert wire.startUse();
         for (int i = -128; i < 127; i++) {
 
-            final byte[] expected = {(byte) i};
+            @NotNull final byte[] expected = {(byte) i};
             wire.writeDocument(false, w ->
                     w.write().object(expected)
             );
@@ -99,7 +101,7 @@ public class ValueOutTest extends TestCase {
             System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
 
             wire.readDocument(null, w -> {
-                final byte[] actual = (byte[]) w.read().object();
+                @Nullable final byte[] actual = (byte[]) w.read().object();
                 Assert.assertArrayEquals(expected, actual);
             });
 

@@ -45,7 +45,7 @@ public class JSONWire extends TextWire {
 
     public static String asText(@NotNull Wire wire) {
         long pos = wire.bytes().readPosition();
-        JSONWire tw = new JSONWire(nativeBytes());
+        @NotNull JSONWire tw = new JSONWire(nativeBytes());
         wire.copyTo(tw);
         wire.bytes().readPosition(pos);
 
@@ -69,6 +69,7 @@ public class JSONWire extends TextWire {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     protected Quotes needsQuotes(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {

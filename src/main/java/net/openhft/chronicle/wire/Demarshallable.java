@@ -31,10 +31,11 @@ import java.lang.reflect.InvocationTargetException;
 public interface Demarshallable {
 
     ClassValue<Constructor<Demarshallable>> DEMARSHALLABLES = new ClassValue<Constructor<Demarshallable>>() {
+        @NotNull
         @Override
-        protected Constructor<Demarshallable> computeValue(Class<?> type) {
+        protected Constructor<Demarshallable> computeValue(@NotNull Class<?> type) {
             try {
-                Constructor<Demarshallable> declaredConstructor =
+                @NotNull Constructor<Demarshallable> declaredConstructor =
                         (Constructor<Demarshallable>)
                                 type.getDeclaredConstructor(WireIn.class);
                 declaredConstructor.setAccessible(true);
@@ -46,7 +47,7 @@ public interface Demarshallable {
     };
 
     @NotNull
-    static <T extends Demarshallable> T newInstance(Class<T> clazz, WireIn wireIn) {
+    static <T extends Demarshallable> T newInstance(@NotNull Class<T> clazz, WireIn wireIn) {
         try {
             return (T) DEMARSHALLABLES.get(clazz).newInstance(wireIn);
 

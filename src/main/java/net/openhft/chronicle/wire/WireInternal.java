@@ -60,7 +60,8 @@ public enum WireInternal {
         ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdaterWithArg.class, "UpdaterWithArg");
     }
 
-    public static <E extends Enum<E>> E internEnum(Class<E> eClass, CharSequence cs) {
+    @NotNull
+    public static <E extends Enum<E>> E internEnum(@NotNull Class<E> eClass, CharSequence cs) {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
     }
 
@@ -80,7 +81,7 @@ public enum WireInternal {
         assert wireOut.startUse();
         long position;
         try {
-            Bytes bytes = wireOut.bytes();
+            @NotNull Bytes bytes = wireOut.bytes();
             position = bytes.writePosition();
 
             int metaDataBit = metaData ? Wires.META_DATA : 0;
@@ -104,7 +105,7 @@ public enum WireInternal {
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) {
-        final Bytes bytes = wireIn.bytes();
+        @NotNull final Bytes bytes = wireIn.bytes();
         long position = bytes.readPosition();
         long limit = bytes.readLimit();
         try {
@@ -120,7 +121,7 @@ public enum WireInternal {
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) {
-        final Bytes<?> bytes = wireIn.bytes();
+        @NotNull final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.readRemaining() >= 4) {
             long position = bytes.readPosition();
@@ -168,7 +169,7 @@ public enum WireInternal {
     }
 
     public static void rawReadData(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) {
-        final Bytes<?> bytes = wireIn.bytes();
+        @NotNull final Bytes<?> bytes = wireIn.bytes();
         int header = bytes.readInt();
         assert Wires.isReady(header) && Wires.isData(header);
         final int len = Wires.lengthOf(header);
@@ -190,7 +191,7 @@ public enum WireInternal {
 
     @NotNull
     static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
 
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
@@ -216,7 +217,7 @@ public enum WireInternal {
                     sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
                     break;
                 }
-                String type = Wires.isData(header)
+                @NotNull String type = Wires.isData(header)
                         ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                         : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
                 byte firstByte = bytes.readByte(bytes.readPosition());
@@ -238,7 +239,7 @@ public enum WireInternal {
 
                 if (binary) {
                     Bytes bytes2 = Bytes.elasticByteBuffer();
-                    TextWire textWire = new TextWire(bytes2);
+                    @NotNull TextWire textWire = new TextWire(bytes2);
                     long readLimit = bytes.readLimit();
 
                     long readPosition = bytes.readPosition();
@@ -278,15 +279,15 @@ public enum WireInternal {
     }
 
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) {
-        Class type = valueIn.typePrefix();
-        String preMessage = null;
+        @Nullable Class type = valueIn.typePrefix();
+        @Nullable String preMessage = null;
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
-        final String finalPreMessage = preMessage;
+        @Nullable final String finalPreMessage = preMessage;
         final Throwable finalThrowable = throwable;
-        final List<StackTraceElement> stes = new ArrayList<>();
+        @NotNull final List<StackTraceElement> stes = new ArrayList<>();
         valueIn.marshallable(m -> {
-            final String message = merge(finalPreMessage, m.read(() -> "message").text());
+            @Nullable final String message = merge(finalPreMessage, m.read(() -> "message").text());
 
             if (message != null) {
                 try {
@@ -298,9 +299,9 @@ public enum WireInternal {
             m.read(() -> "stackTrace").sequence(stes, (stes0, stackTrace) -> {
                 while (stackTrace.hasNextSequenceItem()) {
                     stackTrace.marshallable(r -> {
-                        final String declaringClass = r.read(() -> "class").text();
-                        final String methodName = r.read(() -> "method").text();
-                        final String fileName = r.read(() -> "file").text();
+                        @Nullable final String declaringClass = r.read(() -> "class").text();
+                        @Nullable final String methodName = r.read(() -> "method").text();
+                        @Nullable final String fileName = r.read(() -> "file").text();
                         final int lineNumber = r.read(() -> "line").int32();
 
                         stes0.add(new StackTraceElement(declaringClass, methodName,
@@ -334,7 +335,7 @@ public enum WireInternal {
     }
 
     @Deprecated
-    public static void compress(ValueOut out, String compression, String str) {
+    public static void compress(@NotNull ValueOut out, String compression, String str) {
         Bytes bytes = Wires.acquireBytes();
         bytes.writeUtf8(str);
         Bytes bytes2 = Wires.acquireAnotherBytes();

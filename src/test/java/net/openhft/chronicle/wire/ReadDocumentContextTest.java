@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
         assertFalse(b.sharedMemory());
-        Wire wire = new TextWire(b);
+        @NotNull Wire wire = new TextWire(b);
         assertFalse(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -50,9 +51,9 @@ public class ReadDocumentContextTest {
     @Test
     public void testWritingNotCompleteDocumentShared() throws IOException {
 
-        try (MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10)) {
+        try (@NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10)) {
             assertTrue(b.sharedMemory());
-            Wire wire = new TextWire(b);
+            @NotNull Wire wire = new TextWire(b);
             assertTrue(wire.notCompleteIsNotPresent());
 
             try (DocumentContext dc = wire.readingDocument()) {
@@ -97,20 +98,20 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        TextWire textWire = new TextWire(b);
+        @NotNull TextWire textWire = new TextWire(b);
 
         textWire.writeDocument(true, w -> {
         });
 
         textWire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isData());
             assertTrue(dc.wire().bytes().isEmpty());
         }
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
@@ -124,13 +125,13 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        TextWire textWire = new TextWire(b);
+        @NotNull TextWire textWire = new TextWire(b);
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", textWire.read(() -> "key").text());
@@ -142,20 +143,20 @@ public class ReadDocumentContextTest {
         long newReadPosition = b.readPosition() + 2;
         b.readLimit(newReadPosition);
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertFalse(dc.isPresent());
         }
 
         Assert.assertEquals(newReadPosition, b.readLimit());
 
         b.readLimit(limit);
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", textWire.read(() -> "key").text());
         }
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
@@ -169,13 +170,13 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        TextWire textWire = new TextWire(b);
+        @NotNull TextWire textWire = new TextWire(b);
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", textWire.read(() -> "key").text());
@@ -187,20 +188,20 @@ public class ReadDocumentContextTest {
         long newReadPosition = b.readPosition() + 5;
         b.readLimit(newReadPosition);
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertFalse(dc.isPresent());
         }
 
         Assert.assertEquals(newReadPosition, b.readLimit());
 
         b.readLimit(limit);
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
             Assert.assertEquals("someText", textWire.read(() -> "key").text());
         }
 
-        try (DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());

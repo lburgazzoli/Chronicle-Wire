@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.cfg.ApplicationCfg;
 import net.openhft.chronicle.wire.cfg.MapInstallable;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,13 +43,13 @@ public class Main {
         ClassAliasPool.CLASS_ALIASES.addAlias(iClasses);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(@NotNull String[] args) throws IOException {
         addClass(ApplicationCfg.class);
 
-        String name = args.length > 0 ? args[0] : "engine.yaml";
+        @NotNull String name = args.length > 0 ? args[0] : "engine.yaml";
         TextWire yaml = TextWire.fromFile(name);
-        MapInstallable installable = (MapInstallable) yaml.readObject();
-        Map<String, Object> root = Collections.synchronizedMap(new LinkedHashMap<>());
+        @NotNull MapInstallable installable = (MapInstallable) yaml.readObject();
+        @NotNull Map<String, Object> root = Collections.synchronizedMap(new LinkedHashMap<>());
         try {
             installable.install("/", root);
             LOGGER.info("Engine started");

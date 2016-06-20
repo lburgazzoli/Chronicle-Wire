@@ -40,6 +40,7 @@ public interface MarshallableOut {
      *
      * @return the DocumentContext
      */
+    @NotNull
     DocumentContext writingDocument() throws UnrecoverableTimeoutException;
 
     /**
@@ -54,7 +55,7 @@ public interface MarshallableOut {
      * @param value to write with it.
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             dc.wire().write(key).object(value);
         }
     }
@@ -64,8 +65,8 @@ public interface MarshallableOut {
      *
      * @param writer to write
      */
-    default void writeDocument(WriteMarshallable writer) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             writer.writeMarshallable(dc.wire());
         }
     }
@@ -74,7 +75,7 @@ public interface MarshallableOut {
      * @param marshallable to write to excerpt.
      */
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             marshallable.writeMarshallable(dc.wire().bytes());
         }
     }
@@ -85,8 +86,8 @@ public interface MarshallableOut {
      * @param t      to write
      * @param writer using this code
      */
-    default <T> void writeDocument(T t, BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             writer.accept(dc.wire().getValueOut(), t);
         }
     }
@@ -94,8 +95,8 @@ public interface MarshallableOut {
     /**
      * @param text to write a message
      */
-    default void writeText(CharSequence text) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             dc.wire().bytes().append8bit(text);
         }
     }
@@ -103,9 +104,9 @@ public interface MarshallableOut {
     /**
      * Write a Map as a marshallable
      */
-    default void writeMap(Map<?, ?> map) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
+    default void writeMap(@NotNull Map<?, ?> map) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
                 dc.wire().writeEvent(Object.class, entry.getKey()).object(Object.class, entry.getValue());
             }
         }
@@ -118,13 +119,15 @@ public interface MarshallableOut {
      * @param additional any additional interfaces
      * @return a proxy which implements the primary interface (additional interfaces have to be cast)
      */
-    default <T> T methodWriter(Class<T> tClass, Class... additional) {
+    @NotNull
+    default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new MethodWriterInvocationHandler(this));
     }
 
+    @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
         return new MethodWriterBuilder<>(this, tClass);
     }

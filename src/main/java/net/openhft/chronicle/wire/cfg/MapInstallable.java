@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire.cfg;
 
 import net.openhft.chronicle.wire.ReadMarshallable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import java.util.Map;
  * Created by peter on 26/08/15.
  */
 public interface MapInstallable extends ReadMarshallable {
+    @Nullable
     Object install(String path, Map<String, Object> assetTree) throws Exception;
 }
 

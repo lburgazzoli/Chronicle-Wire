@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
  * Anything you can read marshallable object from.
  */
 public interface MarshallableIn {
+    @NotNull
     DocumentContext readingDocument();
 
     /**
@@ -22,7 +24,7 @@ public interface MarshallableIn {
      * @return {@code true} if successful
      */
     default boolean readDocument(@NotNull ReadMarshallable reader) {
-        try (DocumentContext dc = readingDocument()) {
+        try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
             reader.readMarshallable(dc.wire());
@@ -35,7 +37,7 @@ public interface MarshallableIn {
      * @return {@code true} if successful
      */
     default boolean readBytes(@NotNull ReadBytesMarshallable reader) {
-        try (DocumentContext dc = readingDocument()) {
+        try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
             reader.readMarshallable(dc.wire().bytes());
@@ -49,7 +51,7 @@ public interface MarshallableIn {
      */
     default boolean readBytes(@NotNull Bytes using) {
         using.clear();
-        try (DocumentContext dc = readingDocument()) {
+        try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
             using.write(dc.wire().bytes());
@@ -62,8 +64,9 @@ public interface MarshallableIn {
      *
      * @return the String or null if there is none.
      */
+    @Nullable
     default String readText() {
-        try (DocumentContext dc = readingDocument()) {
+        try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 return null;
             }
@@ -79,8 +82,8 @@ public interface MarshallableIn {
      * @param sb to copy the text into
      * @return true if there was a message, or false if not.
      */
-    default boolean readText(StringBuilder sb) {
-        try (DocumentContext dc = readingDocument()) {
+    default boolean readText(@NotNull StringBuilder sb) {
+        try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 sb.setLength(0);
                 return false;
@@ -95,18 +98,19 @@ public interface MarshallableIn {
      *
      * @return the Map, or null if no message is waiting.
      */
+    @Nullable
     default <K, V> Map<K, V> readMap() {
-        try (DocumentContext dc = readingDocument()) {
+        try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 return null;
             }
             final Wire wire = dc.wire();
             if (!wire.hasMore())
                 return Collections.emptyMap();
-            Map<K, V> ret = new LinkedHashMap<>();
+            @NotNull Map<K, V> ret = new LinkedHashMap<>();
             while (wire.hasMore()) {
-                K key = (K) wire.readEvent(Object.class);
-                V value = (V) wire.getValueIn().object();
+                @NotNull K key = (K) wire.readEvent(Object.class);
+                @Nullable V value = (V) wire.getValueIn().object();
                 ret.put(key, value);
             }
             return ret;
@@ -119,6 +123,7 @@ public interface MarshallableIn {
      * @param objects which implement the methods serialized to the file.
      * @return a reader which will read one Excerpt at a time
      */
+    @NotNull
     default MethodReader methodReader(Object... objects) {
         return new MethodReader(this, objects);
     }

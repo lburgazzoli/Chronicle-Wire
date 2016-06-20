@@ -47,18 +47,21 @@ public interface ValueIn {
     /*
      * Text / Strings.
      */
+    @NotNull
     default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
-        final String text = text();
+        @Nullable final String text = text();
         ts.accept(t, text);
         return wireIn();
     }
 
+    @NotNull
     default WireIn text(@NotNull StringBuilder sb) {
         if (textTo(sb) == null)
             sb.setLength(0);
         return wireIn();
     }
 
+    @NotNull
     default WireIn text(@NotNull Bytes sdo) {
         sdo.clear();
         textTo(sdo);
@@ -88,6 +91,7 @@ public interface ValueIn {
         return bytes(toBytes);
     }
 
+    @Nullable
     default BytesStore bytesLiteral() {
         return bytesStore();
     }
@@ -106,11 +110,11 @@ public interface ValueIn {
 
     @Nullable
     default BytesStore bytesStore() {
-        byte[] bytes = bytes();
+        @Nullable byte[] bytes = bytes();
         return bytes == null ? null : BytesStore.wrap(bytes);
     }
 
-    default void byteBuffer(ByteBuffer bb) {
+    default void byteBuffer(@NotNull ByteBuffer bb) {
         bb.put(bytes());
     }
 
@@ -192,8 +196,9 @@ public interface ValueIn {
     @NotNull
     WireIn int64(@NotNull LongValue value);
 
+    @NotNull
     default LongValue int64ForBinding(@Nullable LongValue value) {
-        LongValue ret = wireIn().newLongReference();
+        @NotNull LongValue ret = wireIn().newLongReference();
         int64(ret);
         return ret;
     }
@@ -211,15 +216,15 @@ public interface ValueIn {
         return sequence(t, tReader::readUsing);
     }
 
-    default <T> Set<T> set(Class<T> t) {
+    default <T> Set<T> set(@NotNull Class<T> t) {
         return collection(LinkedHashSet::new, t);
     }
 
-    default <T> List<T> list(Class<T> t) {
+    default <T> List<T> list(@NotNull Class<T> t) {
         return collection(ArrayList::new, t);
     }
 
-    default <T, C extends Collection<T>> C collection(Supplier<C> supplier, Class<T> t) {
+    default <T, C extends Collection<T>> C collection(@NotNull Supplier<C> supplier, @NotNull Class<T> t) {
         C list = supplier.get();
         sequence(list, (s, v) -> {
             while (v.hasNextSequenceItem())
@@ -228,15 +233,18 @@ public interface ValueIn {
         return list;
     }
 
-    default <O, T extends ReadMarshallable> WireIn set(O o, Function<O, T> tSupplier) {
+    @NotNull
+    default <O, T extends ReadMarshallable> WireIn set(@NotNull O o, @NotNull Function<O, T> tSupplier) {
         return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable> WireIn list(O o, Function<O, T> tSupplier) {
+    @NotNull
+    default <O, T extends ReadMarshallable> WireIn list(@NotNull O o, @NotNull Function<O, T> tSupplier) {
         return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable> WireIn collection(O o, Function<O, T> tSupplier) {
+    @NotNull
+    default <O, T extends ReadMarshallable> WireIn collection(@NotNull O o, @NotNull Function<O, T> tSupplier) {
         sequence(o, (o2, v) -> {
             while (v.hasNextSequenceItem()) {
                 T t = tSupplier.apply(o2);
@@ -246,11 +254,13 @@ public interface ValueIn {
         return wireIn();
     }
 
-    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, Class<V> vClass) {
+    @Nullable
+    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, @NotNull Class<V> vClass) {
         return marshallableAsMap(kClass, vClass, new LinkedHashMap<>());
     }
 
-    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
+    @Nullable
+    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) {
         return marshallable(m -> {
             m.readAllAsMap(kClass, vClass, map);
         }) ? map : null;
@@ -261,8 +271,9 @@ public interface ValueIn {
     @Nullable
     <T> T typedMarshallable() throws IORuntimeException;
 
-    default <T> T typedMarshallable(Function<Class, ReadMarshallable> marshallableFunction) throws IORuntimeException {
-        final Class aClass = typePrefix();
+    @Nullable
+    default <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction) throws IORuntimeException {
+        @Nullable final Class aClass = typePrefix();
         if (ReadMarshallable.class.isAssignableFrom(aClass)) {
             final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
             marshallable(marshallable);
@@ -369,18 +380,21 @@ public interface ValueIn {
         return WireInternal.throwable(this, appendCurrentStack);
     }
 
+    @Nullable
     default <E extends Enum<E>> E asEnum(Class<E> eClass) {
         StringBuilder sb = WireInternal.acquireStringBuilder();
         text(sb);
         return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
     }
 
-    default <E extends Enum<E>> WireIn asEnum(Class<E> eClass, Consumer<E> eConsumer) {
+    @NotNull
+    default <E extends Enum<E>> WireIn asEnum(Class<E> eClass, @NotNull Consumer<E> eConsumer) {
         eConsumer.accept(asEnum(eClass));
         return wireIn();
     }
 
-    default <E extends Enum<E>, T> WireIn asEnum(Class<E> eClass, T t, BiConsumer<T, E> teConsumer) {
+    @NotNull
+    default <E extends Enum<E>, T> WireIn asEnum(Class<E> eClass, T t, @NotNull BiConsumer<T, E> teConsumer) {
         teConsumer.accept(t, asEnum(eClass));
         return wireIn();
     }
@@ -396,8 +410,8 @@ public interface ValueIn {
     }
 
     @Nullable
-    default <E> E object(@Nullable E using, Class clazz) {
-        final Class clazz2 = typePrefix();
+    default <E> E object(@Nullable E using, @Nullable Class clazz) {
+        @Nullable final Class clazz2 = typePrefix();
         if (clazz2 == void.class) {
             text();
             return null;
@@ -428,7 +442,7 @@ public interface ValueIn {
                 return sequence(using, strategy) ? readResolve(using) : null;
 
             case NONE:
-                final E e = (E) strategy.readUsing(using, this);
+                @NotNull final E e = (E) strategy.readUsing(using, this);
                 return (E) ObjectUtils.convertTo(clazz, e);
 
             default:
@@ -441,7 +455,7 @@ public interface ValueIn {
     boolean isNull();
 
     @Nullable
-    default <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
+    default <T, E> WireIn object(@NotNull Class<E> clazz, T t, @NotNull BiConsumer<T, E> e) {
         e.accept(t, object(clazz));
         return wireIn();
     }

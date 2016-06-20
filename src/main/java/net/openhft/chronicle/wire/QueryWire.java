@@ -289,7 +289,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");

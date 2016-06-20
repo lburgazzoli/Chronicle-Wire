@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -62,6 +63,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     static class ReadAnyWireAcquisition implements WireAcquisition {
         private final Bytes bytes;
         WireType wireType;
+        @Nullable
         Wire wire = null;
         private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
@@ -81,11 +83,13 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             return classLookup;
         }
 
+        @NotNull
         @Override
         public Supplier<WireType> underlyingType() {
             return () -> wireType;
         }
 
+        @Nullable
         public Wire acquireWire() {
             if (wire != null)
                 return wire;

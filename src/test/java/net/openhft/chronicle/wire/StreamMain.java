@@ -29,7 +29,7 @@ import java.util.UUID;
 public class StreamMain {
     public static void main(String[] args) {
         ClassAliasPool.CLASS_ALIASES.addAlias(FileFormat.class);
-        for (WireType wt : WireType.values()) {
+        for (@NotNull WireType wt : WireType.values()) {
             if (wt == WireType.CSV)
                 continue;
             
@@ -57,7 +57,7 @@ class FileFormat extends AbstractMarshallable {
     WireType wireType;
 
     @Override
-    public void readMarshallable(WireIn wire) throws IllegalStateException {
+    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         wire.read(() -> "version").int32(this, (o, s) -> o.version = s)
                 .read(() -> "createdTime").zonedDateTime(this, (o, z) -> o.createdTime = z)
                 .read(() -> "creator").text(this, (o, s) -> o.creator = s)

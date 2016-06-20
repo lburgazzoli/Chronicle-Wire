@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,20 +32,20 @@ public class UsingTestMarshallable {
     @Test
     public void testConverMarshallableToTextName() {
 
-        TestMarshallable testMarshallable = new TestMarshallable();
+        @NotNull TestMarshallable testMarshallable = new TestMarshallable();
         testMarshallable.setName("hello world");
 
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
-        ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
+        @Nullable ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
         System.out.println(byteBuffer.getClass());
 
-        Wire textWire = new TextWire(byteBufferBytes);
+        @NotNull Wire textWire = new TextWire(byteBufferBytes);
         textWire.bytes().readPosition();
 
         textWire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
 
-        String value = Wires.fromSizePrefixedBlobs(textWire.bytes());
+        @NotNull String value = Wires.fromSizePrefixedBlobs(textWire.bytes());
 
         //String replace = value.replace("\n", "\\n");
 
@@ -61,15 +62,15 @@ public class UsingTestMarshallable {
     public void testMarshall() {
 
         Bytes bytes = Bytes.elasticByteBuffer();
-        Wire wire = new BinaryWire(bytes);
+        @NotNull Wire wire = new BinaryWire(bytes);
 
-        MyMarshallable x = new MyMarshallable();
+        @NotNull MyMarshallable x = new MyMarshallable();
         x.text.append("text");
 
         wire.write(() -> "key").typedMarshallable(x);
 
-        final ValueIn read = wire.read(() -> "key");
-        final MyMarshallable result = read.typedMarshallable();
+        @NotNull final ValueIn read = wire.read(() -> "key");
+        @Nullable final MyMarshallable result = read.typedMarshallable();
 
         System.out.println(result.toString());
 
@@ -78,6 +79,7 @@ public class UsingTestMarshallable {
 
     public static class MyMarshallable implements Marshallable {
 
+        @NotNull
         public StringBuilder text = new StringBuilder();
 
         @Override
@@ -90,6 +92,7 @@ public class UsingTestMarshallable {
             wire.write(() -> "262").text(text);
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "X{" +

@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class DefaultMarshallerTest {
         DMOuterClass dmOuterClass = ObjectUtils.newInstance(DMOuterClass.class);
         assertNotNull(dmOuterClass.nested);
 
-        DMOuterClass oc = new DMOuterClass("words", true, (byte) 1, 2, 3, 4, 5, (short) 6);
+        @NotNull DMOuterClass oc = new DMOuterClass("words", true, (byte) 1, 2, 3, 4, 5, (short) 6);
         oc.nested.add(new DMNestedClass("hi", 111));
         oc.nested.add(new DMNestedClass("bye", 999));
         oc.map.put("key", new DMNestedClass("value", 1));
@@ -64,10 +65,10 @@ public class DefaultMarshallerTest {
                 "  }\n" +
                 "}\n", oc.toString());
 
-        Wire text = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire text = new TextWire(Bytes.elasticByteBuffer());
         oc.writeMarshallable(text);
 
-        DMOuterClass oc2 = new DMOuterClass();
+        @NotNull DMOuterClass oc2 = new DMOuterClass();
         oc2.readMarshallable(text);
 
         assertEquals(oc, oc2);
@@ -82,7 +83,9 @@ public class DefaultMarshallerTest {
         double d;
         long l;
         int i;
+        @NotNull
         List<DMNestedClass> nested = new ArrayList<>();
+        @NotNull
         Map<String, DMNestedClass> map = new LinkedHashMap<>();
 
         DMOuterClass() {

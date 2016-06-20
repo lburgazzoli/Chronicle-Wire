@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -28,7 +30,7 @@ public class EndOfDayShort extends AbstractMarshallable implements Serializable 
     long daysVolume;
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(() -> "name").text(name)
                 .write(() -> "price").float64(closingPrice)
                 .write(() -> "change").float64(change)
